@@ -1,0 +1,8 @@
+langchain
+matplotlib
+openai
+openai-whisper
+pyaudio
+pymysql
+pyttsx3
+wave

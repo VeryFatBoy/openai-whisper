@@ -1,0 +1,45 @@
+CREATE DATABASE IF NOT EXISTS timeseries_db;
+
+USE timeseries_db;
+
+CREATE TABLE IF NOT EXISTS tick (
+        symbol VARCHAR(10),
+        ts     DATETIME SERIES TIMESTAMP,
+        open   NUMERIC(18, 2),
+        high   NUMERIC(18, 2),
+        low    NUMERIC(18, 2),
+        price  NUMERIC(18, 2),
+        volume INT,
+        KEY(ts)
+);
+
+CREATE TABLE IF NOT EXISTS stock_sentiment (
+        headline  VARCHAR(250),
+        positive  FLOAT,
+        negative  FLOAT,
+        neutral   FLOAT,
+        url       TEXT,
+        publisher VARCHAR(30),
+        ts        DATETIME,
+        symbol    VARCHAR(10)
+);
+
+CREATE PIPELINE tick
+AS LOAD DATA KAFKA 'public-kafka.memcompute.com:9092/stockticker'
+BATCH_INTERVAL 2500
+INTO TABLE tick
+FIELDS TERMINATED BY ','
+(symbol,ts,open,high,low,price,volume);
+
+ALTER PIPELINE tick SET OFFSETS EARLIEST;
+
+TEST PIPELINE tick LIMIT 1;
+
+START PIPELINE tick;
+
+USE timeseries_db;
+
+LOAD DATA LOCAL INFILE '/path/to/stock_sentiment.csv'
+INTO TABLE stock_sentiment
+IGNORE 1 LINES
+COLUMNS TERMINATED BY '\t';
