@@ -28,9 +28,22 @@ s2_host = "<host>"
 s2_db = "timeseries_db"
 db = SQLDatabase.from_uri(f"mysql+pymysql://admin:{s2_password}@{s2_host}:3306/{s2_db}")
 
-llm = OpenAI(temperature = 0, verbose = False)
+llm = OpenAI(
+    model_name = "gpt-3.5-turbo-instruct",
+    temperature = 0,
+    verbose = False
+)
+
 toolkit = SQLDatabaseToolkit(db = db, llm = llm)
-agent_executor = create_sql_agent(llm = OpenAI(temperature = 0), toolkit = toolkit, verbose = False)
+
+agent_executor = create_sql_agent(
+    llm = OpenAI(
+        model_name = "gpt-3.5-turbo-instruct",
+        temperature = 0
+    ),
+    toolkit = toolkit,
+    verbose = False
+)
 
 model = whisper.load_model("base.en")
 

@@ -1,6 +1,6 @@
-langchain==0.0.287
+langchain==0.1
 matplotlib
-openai==0.28.1
+openai==1.7.1
 openai-whisper
 pyaudio
 pymysql
