@@ -36,10 +36,3 @@ ALTER PIPELINE tick SET OFFSETS EARLIEST;
 TEST PIPELINE tick LIMIT 1;
 
 START PIPELINE tick;
-
-USE timeseries_db;
-
-LOAD DATA LOCAL INFILE '/path/to/stock_sentiment.csv'
-INTO TABLE stock_sentiment
-IGNORE 1 LINES
-COLUMNS TERMINATED BY '\t';
