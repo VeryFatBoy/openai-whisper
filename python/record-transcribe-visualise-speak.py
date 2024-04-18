@@ -42,7 +42,9 @@ agent_executor = create_sql_agent(
         temperature = 0
     ),
     toolkit = toolkit,
-    verbose = False
+    max_iterations = 15,
+    max_execution_time = 60,
+    verbose = False,
 )
 
 model = whisper.load_model("base.en")
@@ -129,7 +131,8 @@ class AudioRecorderGUI:
             "Transcription:\n" + transcription + "\n"
         )
         
-        speak_thread = threading.Thread(target = self.speak_audio, args = (agent_executor.run(transcription),))
+        speak_thread = threading.Thread(target = self.speak_audio, args = 
+        (agent_executor({"input": transcription}, return_only_outputs = True)["output"],))
         speak_thread.start()
 
         self.start_button.config(state = tk.NORMAL)
