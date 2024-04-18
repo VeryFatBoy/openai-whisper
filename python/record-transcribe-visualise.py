@@ -42,7 +42,9 @@ agent_executor = create_sql_agent(
         temperature = 0
     ),
     toolkit = toolkit,
-    verbose = False
+    max_iterations = 15,
+    max_execution_time = 60,
+    verbose = False,
 )
 
 model = whisper.load_model("base.en")
@@ -119,7 +121,7 @@ class AudioRecorderGUI:
         self.transcription_box.insert(
             tk.END,
             "Transcription:\n" + transcription + "\n" +
-            "Result:\n" + agent_executor.run(transcription) + "\n"
+            "Result:\n" + agent_executor({"input": transcription}, return_only_outputs = True)["output"] + "\n"
         )
 
         self.start_button.config(state = tk.NORMAL)
