@@ -8,9 +8,10 @@ import queue
 import wave
 import whisper
 from tkinter import scrolledtext
-from langchain import OpenAI, SQLDatabase
-from langchain.agents.agent_toolkits import SQLDatabaseToolkit
+from langchain_openai import OpenAI
 from langchain.agents import create_sql_agent
+from langchain_community.agent_toolkits import SQLDatabaseToolkit
+from langchain.sql_database import SQLDatabase
 
 AUDIO_FORMAT = pyaudio.paInt16
 CHANNELS = 1
@@ -25,23 +26,17 @@ s2_host = "<host>"
 s2_db = "timeseries_db"
 db = SQLDatabase.from_uri(f"mysql+pymysql://admin:{s2_password}@{s2_host}:3306/{s2_db}")
 
-llm = OpenAI(
-    model_name = "gpt-3.5-turbo-instruct",
-    temperature = 0,
-    verbose = False
-)
+llm = OpenAI(temperature = 0, verbose = False)
 
 toolkit = SQLDatabaseToolkit(db = db, llm = llm)
 
 agent_executor = create_sql_agent(
-    llm = OpenAI(
-        model_name = "gpt-3.5-turbo-instruct",
-        temperature = 0
-    ),
+    llm = OpenAI(temperature = 0),
     toolkit = toolkit,
     max_iterations = 15,
     max_execution_time = 60,
-    verbose = False,
+    top_k = 3,
+    verbose = False
 )
 
 model = whisper.load_model("base.en")
@@ -92,7 +87,7 @@ class AudioRecorderGUI:
         self.transcription_box.insert(
             tk.END,
             "Transcription:\n" + transcription + "\n" +
-            "Result:\n" + agent_executor({"input": transcription}, return_only_outputs = True)["output"] + "\n"
+            "Result:\n" + agent_executor.invoke(transcription, return_only_outputs = True)["output"] + "\n"
         )
 
         self.start_button.config(state = tk.NORMAL)
