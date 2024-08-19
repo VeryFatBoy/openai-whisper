@@ -1,4 +1,8 @@
+DROP DATABASE IF EXISTS timeseries_db;
 CREATE DATABASE IF NOT EXISTS timeseries_db;
+
+DROP DATABASE IF EXISTS fintech_db;
+CREATE DATABASE IF NOT EXISTS fintech_db;
 
 USE timeseries_db;
 
