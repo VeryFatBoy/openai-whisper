@@ -9,10 +9,10 @@ import tkinter as tk
 import queue
 import wave
 import whisper
+from langchain_community.agent_toolkits.sql.toolkit import SQLDatabaseToolkit
+from langchain_community.agent_toolkits.sql.base import create_sql_agent
+from langchain_community.utilities import SQLDatabase
 from langchain_openai import OpenAI
-from langchain.agents import create_sql_agent
-from langchain_community.agent_toolkits import SQLDatabaseToolkit
-from langchain.sql_database import SQLDatabase
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from tkinter import scrolledtext
 
@@ -24,22 +24,27 @@ CHUNK = 1024
 # Get OpenAI API key
 openai.api_key = os.environ["OPENAI_API_KEY"]
 
+s2_user = "<username>"
 s2_password = "<password>"
 s2_host = "<host>"
-s2_db = "timeseries_db"
-db = SQLDatabase.from_uri(f"mysql+pymysql://admin:{s2_password}@{s2_host}:3306/{s2_db}")
+s2_port = <port>
+s2_db = "<database>"
+db = SQLDatabase.from_uri(
+        f"mysql+pymysql://{s2_user}:{s2_password}@{s2_host}:{s2_port}/{s2_db}"
+        "?ssl_ca=/path/to/singlestore_bundle.pem"
+)
 
 llm = OpenAI(temperature = 0, verbose = False)
 
 toolkit = SQLDatabaseToolkit(db = db, llm = llm)
 
 agent_executor = create_sql_agent(
-    llm = OpenAI(temperature = 0),
-    toolkit = toolkit,
-    max_iterations = 15,
-    max_execution_time = 60,
-    top_k = 3,
-    verbose = False
+        llm = llm,
+        toolkit = toolkit,
+        max_iterations = 15,
+        max_execution_time = 60,
+        top_k = 3,
+        verbose = False
 )
 
 model = whisper.load_model("base.en")
@@ -159,11 +164,15 @@ class AudioRecorderGUI:
 
     def transcribe_audio(self, filename):
         with open(filename, "rb") as audio_file:
-            # transcript = openai.Audio.transcribe(
+            # from openai import OpenAI
+            # client = OpenAI()
+            # transcript = client.audio.transcriptions.create(
             #     model = "whisper-1",
             #     file = audio_file,
+            #     response_format = "text",
             #     language = "en"
             # )
+            # return transcript.strip()
             transcript = model.transcribe(filename)
             return transcript["text"].strip()
 
