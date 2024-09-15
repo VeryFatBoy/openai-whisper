@@ -30,7 +30,7 @@ s2_host = "<host>"
 s2_port = <port>
 s2_db = "<database>"
 db = SQLDatabase.from_uri(
-        f"mysql+pymysql://{s2_user}:{s2_password}@{s2_host}:{s2_port}/{s2_db}"
+        f"singlestoredb://{s2_user}:{s2_password}@{s2_host}:{s2_port}/{s2_db}"
         "?ssl_ca=/path/to/singlestore_bundle.pem"
 )
 
