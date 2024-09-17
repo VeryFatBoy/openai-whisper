@@ -143,7 +143,7 @@ class AudioRecorderGUI:
 
         self.transcription_box.insert(
             tk.END,
-            "Transcription:\n" + transcription + "\n"
+            "Transcription:\n" + str(transcription) + "\n"
         )
 
         speak_thread = threading.Thread(target = self.speak_audio, args = (result,))
