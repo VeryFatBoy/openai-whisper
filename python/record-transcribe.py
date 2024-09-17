@@ -106,8 +106,8 @@ class AudioRecorderGUI:
 
         self.transcription_box.insert(
             tk.END,
-            "Transcription:\n" + transcription + "\n" +
-            "Result:\n" + result + "\n"
+            "Transcription:\n" + str(transcription) + "\n" +
+            "Result:\n" + str(result) + "\n"
         )
 
         self.start_button.config(state = tk.NORMAL)
