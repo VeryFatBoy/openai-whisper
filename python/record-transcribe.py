@@ -10,7 +10,7 @@ import whisper
 from langchain_community.agent_toolkits.sql.toolkit import SQLDatabaseToolkit
 from langchain_community.agent_toolkits.sql.base import create_sql_agent
 from langchain_community.utilities import SQLDatabase
-from langchain_openai import OpenAI
+from langchain_openai import ChatOpenAI
 from tkinter import scrolledtext
 
 AUDIO_FORMAT = pyaudio.paInt16
@@ -28,10 +28,11 @@ s2_port = <port>
 s2_db = "<database>"
 db = SQLDatabase.from_uri(
         f"singlestoredb://{s2_user}:{s2_password}@{s2_host}:{s2_port}/{s2_db}"
-        "?ssl_ca=/path/to/singlestore_bundle.pem"
+        "?ssl_ca=/path/to/singlestore_bundle.pem",
+        include_tables = ["tick", "stock_sentiment"]
 )
 
-llm = OpenAI(temperature = 0, verbose = False)
+llm = ChatOpenAI(model = "gpt-4o-mini", temperature = 0, verbose = False)
 
 toolkit = SQLDatabaseToolkit(db = db, llm = llm)
 
@@ -43,6 +44,8 @@ agent_executor = create_sql_agent(
         top_k = 3,
         verbose = False
 )
+
+error_string = "Could not parse LLM output:"
 
 model = whisper.load_model("base.en")
 
@@ -89,10 +92,22 @@ class AudioRecorderGUI:
         self.record_thread.join()
 
         transcription = self.transcribe_audio(self.audio_filename)
+
+        try:
+            result = agent_executor.invoke(transcription, return_only_outputs = True)["output"]
+        except Exception as e:
+            error_message = str(e)
+            # Check if the error message contains the specific string
+            if error_string in error_message:
+                # Extract the part after the specific string and strip backticks
+                result = error_message.split(error_string)[1].strip().strip('`')
+            else:
+                result = f"Error occurred: {error_message}"
+
         self.transcription_box.insert(
             tk.END,
             "Transcription:\n" + transcription + "\n" +
-            "Result:\n" + agent_executor.invoke(transcription, return_only_outputs = True)["output"] + "\n"
+            "Result:\n" + result + "\n"
         )
 
         self.start_button.config(state = tk.NORMAL)
