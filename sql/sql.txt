@@ -5,31 +5,31 @@ USE timeseries_db;
 
 DROP TABLE IF EXISTS tick;
 CREATE TABLE IF NOT EXISTS tick (
-        symbol VARCHAR(10),
-        ts     DATETIME SERIES TIMESTAMP,
-        open   NUMERIC(18, 2),
-        high   NUMERIC(18, 2),
-        low    NUMERIC(18, 2),
-        price  NUMERIC(18, 2),
-        volume INT,
-        KEY(ts)
+    symbol VARCHAR(10),
+    ts     DATETIME SERIES TIMESTAMP,
+    open   NUMERIC(18, 2),
+    high   NUMERIC(18, 2),
+    low    NUMERIC(18, 2),
+    price  NUMERIC(18, 2),
+    volume INT,
+    KEY(ts)
 );
 
 DROP TABLE IF EXISTS stock_sentiment;
 CREATE TABLE IF NOT EXISTS stock_sentiment (
-        headline  VARCHAR(250),
-        positive  FLOAT,
-        negative  FLOAT,
-        neutral   FLOAT,
-        url       TEXT,
-        publisher VARCHAR(30),
-        ts        DATETIME,
-        symbol    VARCHAR(10)
+    headline  VARCHAR(250),
+    positive  FLOAT,
+    negative  FLOAT,
+    neutral   FLOAT,
+    url       TEXT,
+    publisher VARCHAR(30),
+    ts        DATETIME,
+    symbol    VARCHAR(10)
 );
 
 CREATE PIPELINE tick
 AS LOAD DATA KAFKA 'public-kafka.memcompute.com:9092/stockticker'
-BATCH_INTERVAL 2500
+BATCH_INTERVAL 45000
 INTO TABLE tick
 FIELDS TERMINATED BY ','
 (symbol,ts,open,high,low,price,volume);
@@ -40,6 +40,16 @@ TEST PIPELINE tick LIMIT 1;
 
 START PIPELINE tick;
 
-STOP PIPELINE tick;
+SELECT COUNT(*)
+FROM tick;
 
+-- Cleanup
+
+STOP PIPELINE tick;
 DROP PIPELINE tick;
+
+DROP TABLE IF EXISTS tick;
+-- DROP TABLE IF EXISTS stock_sentiment;
+DROP TABLE IF EXISTS fintech_docs;
+
+DROP DATABASE IF EXISTS timeseries_db;
